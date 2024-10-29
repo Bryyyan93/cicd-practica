@@ -60,7 +60,8 @@ jobs:
           path: test-results.xml
       - persist_to_workspace:
           root: ~/repo
-          paths: .  
+          paths: 
+            - .  
   publish:
     <<: *defaults
     steps:
@@ -73,6 +74,11 @@ jobs:
             zip -r artifacts/app.zip .
       - store_artifacts:
           path: artifacts/app.zip
+      - run:
+          name: Publish to GitHub Packages
+          command: |
+            echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
+            curl -u $GITHUB_USER:$GITHUB_TOKEN -T artifacts/app-${CIRCLE_SHA1}.zip https://maven.pkg.github.com/Bryyyan93/cicd-practica/app-${CIRCLE_SHA1}.zip          
 
 workflows:
   test-deploy:
