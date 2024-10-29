@@ -7,6 +7,9 @@ defaults: &defaults
   docker:
     - image: cimg/python:3.10.5
 
+orbs:
+  sonarcloud: sonarsource/sonarcloud@2.0.0    
+
 jobs:
   test:
     <<: *defaults  
@@ -32,7 +35,15 @@ jobs:
           name: Run lint
           command: |
             . venv/bin/activate
-            flake8 .        
+            flake8 . 
+            
+      # Ejecutar test con Sonar             
+      - run:
+          name: Run tests
+          command: coverage run -m pytest tests
+      - store_test_results:
+          path: coverage xml -o coverage.xml
+      - sonarcloud/scan
 
       # Guardar caché de dependencias
       - save_cache:
