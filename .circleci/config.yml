@@ -14,7 +14,7 @@ jobs:
       - checkout
       # Restaurar caché de dependencias de Python si existe
       - restore_cache:
-        keys
+          keys:
           - v1-dependencies-{{ checksum "requirements.txt" }}
           - v1-dependencies-
 
