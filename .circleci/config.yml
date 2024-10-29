@@ -66,23 +66,14 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/repo
-      - run:
-          name: Debug SHA1
-          command: | 
-            echo "CIRCLE_SHA1: ${CIRCLE_SHA1}"            
+          at: ~/repo        
       - run:
           name: Generate artifact
           command: |
             mkdir -p artifacts
-            zip -r artifacts/app-${CIRCLE_SHA1}.zip .
+            zip -r artifacts/app.zip .
       - store_artifacts:
-          path: artifacts/app.zip
-      - run:
-          name: Publish to GitHub Packages
-          command: |
-            echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
-            curl -u $GITHUB_USER:$GITHUB_TOKEN -T artifacts/app-${CIRCLE_SHA1}.zip https://maven.pkg.github.com/Bryyyan93/cicd-practica/app-${CIRCLE_SHA1}.zip          
+          path: artifacts/app.zip         
 
 workflows:
   test-deploy:
