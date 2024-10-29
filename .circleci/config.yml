@@ -68,10 +68,14 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
+          name: Debug SHA1
+          command: | 
+            echo "CIRCLE_SHA1: ${CIRCLE_SHA1}"            
+      - run:
           name: Generate artifact
           command: |
             mkdir -p artifacts
-            zip -r artifacts/app.zip .
+            zip -r artifacts/app-${CIRCLE_SHA1}.zip .
       - store_artifacts:
           path: artifacts/app.zip
       - run:
