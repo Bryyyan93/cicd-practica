@@ -56,9 +56,28 @@ jobs:
           paths:
             - venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+          
+  publish:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Generate artifact
+          command: |
+            mkdir -p artifacts
+            zip -r artifacts/app.zip app/   
+      - store_artifacts:
+          path: artifacts/app.zip
 
 workflows:
   test-deploy:
     jobs:
       - test:
           context: dev
+      - publish:
+          context: dev
+          filters:
+            branches:
+              only:
+                - main    
