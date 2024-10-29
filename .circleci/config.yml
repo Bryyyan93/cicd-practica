@@ -44,7 +44,7 @@ jobs:
             . venv/bin/activate
             coverage run -m pytest tests
             coverage xml -o coverage.xml
-                      
+
       - sonarcloud/scan
 
       # Guardar caché de dependencias
@@ -52,7 +52,8 @@ jobs:
           paths:
             - venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
-      - store_test_results:
+      # Almacenar coberura    
+      - store_artifacts:
           path: coverage.xml
       - persist_to_workspace:
           root: ~/repo
