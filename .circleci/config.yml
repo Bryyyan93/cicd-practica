@@ -56,7 +56,11 @@ jobs:
           paths:
             - venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
-          
+      - store_test_results:
+          path: test-results.xml
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .  
   publish:
     <<: *defaults
     steps:
