@@ -81,6 +81,8 @@ workflows:
           context: dev
       - publish:
           context: dev
+          requires:
+            - test
           filters:
             branches:
               only:
