@@ -70,7 +70,7 @@ jobs:
           name: Generate artifact
           command: |
             mkdir -p artifacts
-            zip -r artifacts/app.zip app/   
+            zip -r artifacts/app.zip .
       - store_artifacts:
           path: artifacts/app.zip
 
