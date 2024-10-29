@@ -83,10 +83,18 @@ jobs:
       - store_artifacts:
           path: artifacts/app.zip
       - run:
+          name: Get Release ID
+          command: |
+            RELEASE_ID=$(curl -s -u $GITHUB_USER:$GITHUB_TOKEN \
+            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/v1.1.0 | jq -r .id)
+            echo "RELEASE_ID=$RELEASE_ID" >> $BASH_ENV
+      - run:
           name: Publish to GitHub Packages
           command: |
-            echo "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN" > ~/.npmrc
-            curl -u $GITHUB_USER:$GITHUB_TOKEN -T artifacts/app.zip https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${CIRCLE_SHA1}.zip
+            curl -u $GITHUB_USER:$GITHUB_TOKEN \
+            -H "Content-Type: application/zip" \
+            --data-binary @artifacts/app.zip \
+            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${CIRCLE_SHA1}.zip"
          
 workflows:
   test-deploy:
@@ -101,6 +109,7 @@ workflows:
           context: dev
           requires:
             - test
+            - create_release
           filters:
             branches:
               only:
