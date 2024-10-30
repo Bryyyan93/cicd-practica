@@ -112,6 +112,7 @@ workflows:
           filters:
             branches:
               only:
+                  - main
                   - release    
       - publish:
           context: dev
