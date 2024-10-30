@@ -113,10 +113,12 @@ jobs:
       - run:
           name: Docker Hub Login
           command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      
+      - run: ls -la .     
       # Construcción de la imagen
       - run:
           name: Build Docker Image
-          command: docker build -t myapp:${CIRCLE_SHA1} -f ./Dockerfile .
+          command: docker build -t myapp:${CIRCLE_SHA1} .
       # Etiquetado y subida a Docker Hub
       - run:
           name: Tag and Push Image
