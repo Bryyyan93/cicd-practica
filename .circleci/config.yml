@@ -77,8 +77,8 @@ jobs:
             curl -u $GITHUB_USER:$GITHUB_TOKEN -X POST \
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases \
-              -d '{"tag_name":"v2.1.0","name":"Release v2.1.0","body":"feat: Añadir publicación en Github packages","draft":false,"prerelease":false}'             
-  publish:
+              -d '{"tag_name":"v2.2.0","name":"Release v2.2.0","body":"feat: Añadir publicación en Docker hub","draft":false,"prerelease":false}'             
+  publish_github:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -94,7 +94,7 @@ jobs:
           name: Get Release ID
           command: |
             RELEASE_ID=$(curl -s -u $GITHUB_USER:$GITHUB_TOKEN \
-            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/v2.1.0 | jq -r .id)
+            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/v2.2.0 | jq -r .id)
             echo "RELEASE_ID=$RELEASE_ID" >> $BASH_ENV
       - run:
           name: Publish to GitHub Packages
@@ -103,21 +103,48 @@ jobs:
             -H "Content-Type: application/zip" \
             --data-binary @artifacts/app.zip \
             "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${CIRCLE_SHA1}.zip"
-         
+  docker_image:           
+    <<: *defaults
+    steps:
+      # Build Docker image
+      - setup_remote_docker:
+          version: 20.10.7
+      # Autenticarse en Docker Hub
+      - run:
+          name: Docker Hub Login
+          command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      # Construcción de la imagen
+      - run:
+          name: Build Docker Image
+          command: docker build -t myapp:${CIRCLE_SHA1} .
+      # Etiquetado y subida a Docker Hub
+      - run:
+          name: Tag and Push Image
+          command: |
+            docker tag myapp:${CIRCLE_SHA1} $DOCKERHUB_USERNAME/myapp:${CIRCLE_SHA1}
+            docker push $DOCKERHUB_USERNAME/myapp:${CIRCLE_SHA1}
 workflows:
   test-deploy:
     jobs:
       - test:
           context: dev
-      #- create_release:
-      #    context: dev
-      #    requires:
-      #      - test    
-      #- publish:
-      #    context: dev
-      #    requires:
-      #      - create_release
-      #    filters:
-      #      branches:
-      #        only:
-      #          - main    
+      - create_release:
+          context: dev
+          requires:
+            - test    
+      - publish_github:
+          context: dev
+          requires:
+            - create_release
+          filters:
+            branches:
+              only:
+                - main
+      - docker_image:
+          context: dev
+          requires:
+            - create_release
+          filters:
+            branches:
+              only:
+                - main           
