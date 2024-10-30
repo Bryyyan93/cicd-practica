@@ -106,6 +106,8 @@ jobs:
   docker_image:           
     <<: *defaults
     steps:
+      - attach_workspace:
+          at: ~/repo 
       # Build Docker image
       - setup_remote_docker:
           version: 20.10.24
@@ -114,7 +116,7 @@ jobs:
           name: Docker Hub Login
           command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
       
-      - run: ls -la .     
+      - run: ls -la ~/repo
       # Construcción de la imagen
       - run:
           name: Build Docker Image
