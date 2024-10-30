@@ -35,7 +35,7 @@ jobs:
           name: Run lint
           command: |
             . venv/bin/activate
-            flake8 . 
+            flake8 .       
 
       # Generar y guardar el archivo de cobertura             
       - run:
@@ -44,6 +44,11 @@ jobs:
             . venv/bin/activate
             coverage run -m pytest tests
             coverage xml -o coverage.xml
+
+      # Escanear vulnerabilidades con gitGuardian
+      - run:
+          name: Run GitGuardian scan
+          command: ggshield scan repo .      
 
       - sonarcloud/scan
 
@@ -101,15 +106,4 @@ workflows:
     jobs:
       - test:
           context: dev
-      - create_release:
-          context: dev
-          requires:
-            - test    
-      - publish:
-          context: dev
-          requires:
-            - create_release
-          filters:
-            branches:
-              only:
-                - main    
+  

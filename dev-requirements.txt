@@ -12,3 +12,5 @@ trio==0.22.0
 
 coverage
 
+ggshield
+
