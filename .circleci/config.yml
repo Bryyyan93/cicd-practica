@@ -101,10 +101,18 @@ workflows:
     jobs:
       - test:
           context: dev
+          filters:
+            branches:
+              only:
+                - develop
       - create_release:
           context: dev
           requires:
-            - test    
+            - test
+          filters:
+            branches:
+              only:
+                  - release    
       - publish:
           context: dev
           requires:
