@@ -50,7 +50,8 @@ jobs:
           name: Run GitGuardian scan
           command: |
             . venv/bin/activate
-            ggshield scan repo .      
+            export GITGUARDIAN_API_KEY=$GITGUARDIAN_API_KEY
+            ggshield secret scan .      
 
       - sonarcloud/scan
 
