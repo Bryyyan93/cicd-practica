@@ -74,10 +74,15 @@ jobs:
       - run:
           name: Create GitHub Release
           command: |
+            # Toma los primeros 7 caracteres del hash del commit para el nombre de la versión
+            VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)
+            # Guarda VERSION_TAG
+            echo "VERSION_TAG=$VERSION_TAG" >> $BASH_ENV  
+
             curl -u $GITHUB_USER:$GITHUB_TOKEN -X POST \
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases \
-              -d '{"tag_name":"v2.2.0","name":"Release v2.2.0","body":"feat: Añadir publicación en Docker hub","draft":false,"prerelease":false}'             
+              -d '{"tag_name":"'"$VERSION_TAG"'","name":"'"$VERSION_TAG"'","body":"feat: Añadir publicación en Docker hub","draft":false,"prerelease":false}'             
   publish_github:
     <<: *defaults
     steps:
@@ -93,16 +98,18 @@ jobs:
       - run:
           name: Get Release ID
           command: |
+            # Obtener el ID del release usando VERSION_TAG
             RELEASE_ID=$(curl -s -u $GITHUB_USER:$GITHUB_TOKEN \
-            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/v2.2.0 | jq -r .id)
+            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/$VERSION_TAG | jq -r .id)
             echo "RELEASE_ID=$RELEASE_ID" >> $BASH_ENV
       - run:
           name: Publish to GitHub Packages
           command: |
+            # Publicar el artefacto en el release de GitHub
             curl -u $GITHUB_USER:$GITHUB_TOKEN \
             -H "Content-Type: application/zip" \
             --data-binary @artifacts/app.zip \
-            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${CIRCLE_SHA1}.zip"
+            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${VERSION_TAG}.zip"
   docker_image:           
     <<: *defaults
     steps:
@@ -120,13 +127,13 @@ jobs:
       # Construcción de la imagen
       - run:
           name: Build Docker Image
-          command: docker build -t myapp:${CIRCLE_SHA1} .
+          command: docker build -t myapp:${VERSION_TAG} .
       # Etiquetado y subida a Docker Hub
       - run:
           name: Tag and Push Image
           command: |
-            docker tag myapp:${CIRCLE_SHA1} $DOCKERHUB_USERNAME/myapp:${CIRCLE_SHA1}
-            docker push $DOCKERHUB_USERNAME/myapp:${CIRCLE_SHA1}
+            docker tag myapp:${VERSION_TAG} $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
+            docker push $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
 workflows:
   test-deploy:
     jobs:
