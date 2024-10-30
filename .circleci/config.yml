@@ -116,7 +116,6 @@ workflows:
       - publish:
           context: dev
           requires:
-            - test
             - create_release
           filters:
             branches:
