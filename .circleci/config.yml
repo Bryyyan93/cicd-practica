@@ -108,7 +108,7 @@ jobs:
     steps:
       # Build Docker image
       - setup_remote_docker:
-          version: 20.10.7
+          version: 20.10.24
       # Autenticarse en Docker Hub
       - run:
           name: Docker Hub Login
