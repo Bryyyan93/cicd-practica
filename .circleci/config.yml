@@ -116,7 +116,7 @@ jobs:
       # Construcción de la imagen
       - run:
           name: Build Docker Image
-          command: docker build -t myapp:${CIRCLE_SHA1} ./Dockerfile .
+          command: docker build -t myapp:${CIRCLE_SHA1} -f ./Dockerfile .
       # Etiquetado y subida a Docker Hub
       - run:
           name: Tag and Push Image
