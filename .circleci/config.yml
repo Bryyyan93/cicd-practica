@@ -71,6 +71,12 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Set VERSION_TAG
+          command: | 
+            echo "VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV       
       - run:
           name: Create GitHub Release
           command: |
@@ -82,12 +88,16 @@ jobs:
             curl -u $GITHUB_USER:$GITHUB_TOKEN -X POST \
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases \
-              -d '{"tag_name":"'"$VERSION_TAG"'","name":"'"$VERSION_TAG"'","body":"feat: Añadir publicación en Docker hub","draft":false,"prerelease":false}'             
+              -d '{"tag_name":"'"$VERSION_TAG"'","name":"'"$VERSION_TAG"'","body":"feat: Añadir publicación en Docker hub y poner versiones","draft":false,"prerelease":false}'             
   publish_github:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/repo        
+          at: ~/repo
+      - run:
+          name: Set VERSION_TAG
+          command: | 
+            echo "VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV        
       - run:
           name: Generate artifact
           command: |
@@ -96,25 +106,22 @@ jobs:
       - store_artifacts:
           path: artifacts/app.zip
       - run:
-          name: Get Release ID
-          command: |
-            # Obtener el ID del release usando VERSION_TAG
-            RELEASE_ID=$(curl -s -u $GITHUB_USER:$GITHUB_TOKEN \
-            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/$VERSION_TAG | jq -r .id)
-            echo "RELEASE_ID=$RELEASE_ID" >> $BASH_ENV
-      - run:
           name: Publish to GitHub Packages
           command: |
             # Publicar el artefacto en el release de GitHub
             curl -u $GITHUB_USER:$GITHUB_TOKEN \
             -H "Content-Type: application/zip" \
             --data-binary @artifacts/app.zip \
-            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${VERSION_TAG}.zip"
+            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${VERSION_TAG}/assets?name=app-${VERSION_TAG}.zip"
   docker_image:           
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/repo 
+          at: ~/repo
+      - run:
+          name: Set VERSION_TAG
+          command: | 
+            echo "VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV            
       # Build Docker image
       - setup_remote_docker:
           version: 20.10.24
