@@ -10,7 +10,7 @@ httpx==0.23.0
 
 trio==0.22.0
 
-coverage
+coverage==7.6.4
 
-ggshield
+ggshield==1.33.0
 

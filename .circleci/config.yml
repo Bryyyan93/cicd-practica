@@ -48,7 +48,9 @@ jobs:
       # Escanear vulnerabilidades con gitGuardian
       - run:
           name: Run GitGuardian scan
-          command: ggshield scan repo .      
+          command: |
+            . venv/bin/activate
+            ggshield scan repo .      
 
       - sonarcloud/scan
 
@@ -106,4 +108,15 @@ workflows:
     jobs:
       - test:
           context: dev
-  
+      #- create_release:
+      #    context: dev
+      #    requires:
+      #      - test    
+      #- publish:
+      #    context: dev
+      #    requires:
+      #      - create_release
+      #    filters:
+      #      branches:
+      #        only:
+      #          - main    
