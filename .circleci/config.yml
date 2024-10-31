@@ -160,7 +160,7 @@ jobs:
       - run:
           name: Login to ArgoCD
           command: |
-            kubectl apply -f argocd/application.yaml -n argocd
+            kubectl apply -f application.yaml -n argocd
 
 workflows:
   test-deploy:
