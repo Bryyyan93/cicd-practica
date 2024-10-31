@@ -7,9 +7,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: 'https://github.com/tu-usuario/cicd-practica'
+    repoURL: 'https://github.com/Bryyyan93/cicd-practica.git'
     targetRevision: main
-    path: manifests
+    path: charts
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: myapp-namespace
