@@ -151,7 +151,7 @@ jobs:
             
   # iniciar sesión en el servidor y sincronizar la aplicación
   deploy_to_argocd:
-    <: *defaults
+    <<: *defaults
     docker:
       - image: bitnami/kubectl:latest  # Imagen con `kubectl` instalado
     steps:
