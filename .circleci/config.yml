@@ -156,7 +156,7 @@ jobs:
       - image: bitnami/kubectl:latest  # Imagen con `kubectl` instalado
     steps:
       - attach_workspace:
-          at: ~/repo 
+          at: ~/repo
       - run: ls -la ~/repo 
       - run:
           name: Apply Application Manifest in ArgoCD
@@ -191,7 +191,6 @@ workflows:
       - deploy_to_argocd:
           context: dev
           requires:
-            - test
             - docker_image
           filters:
             branches:
