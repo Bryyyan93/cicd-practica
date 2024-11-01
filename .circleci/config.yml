@@ -151,7 +151,7 @@ jobs:
             
   # iniciar sesión en el servidor y sincronizar la aplicación
   deploy_to_argocd:
-    <<: *defaults
+    #<<: *defaults
     docker:
       - image: bitnami/kubectl:latest  # Imagen con `kubectl` instalado
     steps:
@@ -172,14 +172,7 @@ workflows:
           context: dev
           requires:
             - test    
-      - publish_github:
-          context: dev
-          requires:
-            - create_release
-          filters:
-            branches:
-              only:
-                - main
+
       - docker_image:
           context: dev
           requires:
