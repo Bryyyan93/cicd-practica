@@ -158,6 +158,8 @@ workflows:
             branches:
               only:
                 - develop
+                - release
+                - main
       - create_release:
           context: dev
           requires:
@@ -165,11 +167,11 @@ workflows:
           filters:
             branches:
               only:
-                - release   
+                - release 
       - publish_github:
           context: dev
           requires:
-            - create_release
+            - test
           filters:
             branches:
               only:
@@ -177,7 +179,7 @@ workflows:
       - docker_image:
           context: dev
           requires:
-            - create_release
+            - test
           filters:
             branches:
               only:
