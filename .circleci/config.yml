@@ -167,14 +167,8 @@ workflows:
           filters:
             branches:
               only:
-<<<<<<< HEAD
-                  - main
-                  - release    
-      - publish:
-=======
-                - release 
+                - release # Solo se ejecuta en la rama 
       - publish_github:
->>>>>>> develop
           context: dev
           requires:
             - test
