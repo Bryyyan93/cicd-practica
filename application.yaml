@@ -1,0 +1,19 @@
+# Manifiesto de Argocd
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/Bryyyan93/cicd-practica.git'
+    targetRevision: main
+    path: charts
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: myapp-namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,4 +1,4 @@
-# Circleci
+#Circleci
 version: 2.1
 python: circleci/python@2.1.1
 
@@ -35,7 +35,7 @@ jobs:
           name: Run lint
           command: |
             . venv/bin/activate
-            flake8 . 
+            flake8 .       
 
       # Generar y guardar el archivo de cobertura             
       - run:
@@ -45,7 +45,15 @@ jobs:
             coverage run -m pytest tests
             coverage xml -o coverage.xml
 
-      - sonarcloud/scan
+      # Escanear vulnerabilidades con gitGuardian
+      - run:
+          name: Run GitGuardian scan
+          command: |
+            . venv/bin/activate
+            export GITGUARDIAN_API_KEY=$GITGUARDIAN_API_KEY
+            ggshield secret scan repo .      
+
+      #- sonarcloud/scan
 
       # Guardar caché de dependencias
       - save_cache:
@@ -63,18 +71,33 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Set VERSION_TAG
+          command: | 
+            echo "VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV       
       - run:
           name: Create GitHub Release
           command: |
+            # Toma los primeros 7 caracteres del hash del commit para el nombre de la versión
+            VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)
+            # Guarda VERSION_TAG
+            echo "VERSION_TAG=$VERSION_TAG" >> $BASH_ENV  
+
             curl -u $GITHUB_USER:$GITHUB_TOKEN -X POST \
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases \
-              -d '{"tag_name":"v2.1.0","name":"Release v2.1.0","body":"feat: Añadir publicación en Github packages","draft":false,"prerelease":false}'             
-  publish:
+              -d '{"tag_name":"'"$VERSION_TAG"'","name":"'"$VERSION_TAG"'","body":"feat: Despliegue con Argocd","draft":false,"prerelease":false}'             
+  publish_github:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: ~/repo        
+          at: ~/repo
+      - run:
+          name: Set VERSION_TAG
+          command: | 
+            echo "VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV        
       - run:
           name: Generate artifact
           command: |
@@ -84,18 +107,48 @@ jobs:
           path: artifacts/app.zip
       - run:
           name: Get Release ID
-          command: |
+          command: |  
+            # Obtener el ID del release usando el tag
             RELEASE_ID=$(curl -s -u $GITHUB_USER:$GITHUB_TOKEN \
-            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/v2.1.0 | jq -r .id)
+            https://api.github.com/repos/$GITHUB_USER/cicd-practica/releases/tags/$VERSION_TAG | jq -r .id)
             echo "RELEASE_ID=$RELEASE_ID" >> $BASH_ENV
       - run:
           name: Publish to GitHub Packages
           command: |
+            # Publicar el artefacto en el release de GitHub
             curl -u $GITHUB_USER:$GITHUB_TOKEN \
             -H "Content-Type: application/zip" \
             --data-binary @artifacts/app.zip \
-            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${CIRCLE_SHA1}.zip"
-         
+            "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${VERSION_TAG}.zip"
+  docker_image:           
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Set VERSION_TAG
+          command: | 
+            echo "VERSION_TAG=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV            
+      # Build Docker image
+      - setup_remote_docker:
+          version: 20.10.24
+      # Autenticarse en Docker Hub
+      - run:
+          name: Docker Hub Login
+          command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      
+      - run: ls -la ~/repo
+      # Construcción de la imagen
+      - run:
+          name: Build Docker Image
+          command: docker build -t myapp:${VERSION_TAG} .
+      # Etiquetado y subida a Docker Hub
+      - run:
+          name: Tag and Push Image
+          command: |
+            docker tag myapp:${VERSION_TAG} $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
+            docker push $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
+
 workflows:
   test-deploy:
     jobs:
@@ -105,6 +158,8 @@ workflows:
             branches:
               only:
                 - develop
+                - release
+                - main
       - create_release:
           context: dev
           requires:
@@ -112,13 +167,26 @@ workflows:
           filters:
             branches:
               only:
+<<<<<<< HEAD
                   - main
                   - release    
       - publish:
+=======
+                - release 
+      - publish_github:
+>>>>>>> develop
           context: dev
           requires:
-            - create_release
+            - test
           filters:
             branches:
               only:
-                - main    
+                - main
+      - docker_image:
+          context: dev
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - main
