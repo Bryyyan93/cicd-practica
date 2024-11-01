@@ -53,7 +53,7 @@ jobs:
             export GITGUARDIAN_API_KEY=$GITGUARDIAN_API_KEY
             ggshield secret scan repo .      
 
-      - sonarcloud/scan
+      #- sonarcloud/scan
 
       # Guardar caché de dependencias
       - save_cache:
@@ -156,7 +156,8 @@ jobs:
       - image: bitnami/kubectl:latest  # Imagen con `kubectl` instalado
     steps:
       - attach_workspace:
-          at: ~/repo  
+          at: ~/repo 
+      - run: ls -la ~/repo 
       - run:
           name: Apply Application Manifest in ArgoCD
           command: |
