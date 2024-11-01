@@ -148,20 +148,6 @@ jobs:
           command: |
             docker tag myapp:${VERSION_TAG} $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
             docker push $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
-            
-  # iniciar sesión en el servidor y sincronizar la aplicación
-  deploy_to_argocd:
-    #<<: *defaults
-    docker:
-      - image: bitnami/kubectl:latest  # Imagen con `kubectl` instalado
-    steps:
-      - attach_workspace:
-          at: ~/repo
-      - run: ls -la ~/repo 
-      - run:
-          name: Apply Application Manifest in ArgoCD
-          command: |
-            kubectl apply -f application.yaml -n argocd
 
 workflows:
   test-deploy:
@@ -172,7 +158,14 @@ workflows:
           context: dev
           requires:
             - test    
-
+      - publish_github:
+          context: dev
+          requires:
+            - create_release
+          filters:
+            branches:
+              only:
+                - main
       - docker_image:
           context: dev
           requires:
@@ -181,11 +174,3 @@ workflows:
             branches:
               only:
                 - main
-      - deploy_to_argocd:
-          context: dev
-          requires:
-            - docker_image
-          filters:
-            branches:
-              only:
-                - main                 
