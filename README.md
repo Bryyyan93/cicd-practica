@@ -208,4 +208,34 @@ La imagen Docker se construye y se etiqueta en el job `docker_image`, se ejecuta
 ![alt text](/img/push_dockerhub.png)  
 
 ### Despliegue en ArgoCD
-Para el despliegue en Kubernetes se usará ArgoCD junto con las Charts de Helm, para ello se crea un manifiesto de `aplicattion.yaml` especificando las configuraciones iniciales. 
+Para el despliegue en Kubernetes se usará ArgoCD junto con las Charts de Helm, para ello se crea un manifiesto de `aplicattion.yaml` especificando las configuraciones iniciales. Los manifiestos de Helm estarán en `./charts`.
+
+```
+# Manifiesto de Argocd
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/Bryyyan93/cicd-practica.git'
+    targetRevision: main
+    path: charts
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: myapp-namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+Para verificar el correcto despliegue en ArgoCD se debera:  
+
+- Verificar la instalación de ArgoCD en el Clúster: `kubectl get pods -n argocd`.  
+  ![alt text](/img/argocd_pods.png)  
+
+- Para desplegar la aplicación se ejecutará el siguiente comando: `kubectl apply -f ./charts/application.yaml -n argocd`.  Se deberá pener el siguiente resultado:
+  ![alt text](/img/argo_localhost.png)  
+  ![alt text](/img/aplicacion_desplegada.png)  
