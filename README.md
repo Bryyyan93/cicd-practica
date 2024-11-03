@@ -1,20 +1,21 @@
 # Practica: CI/CD de una aplicación
 
 ## Menú
-- [Descripción de la práctica](#descripción-de-la-práctica)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Requisitos](#requisitos)
-- [Descripción de los entregables](#descripción-de-los-entregables)
-  - [Repositorio en GitHub y gestión de ramas con git flow](#repositorio-en-github-y-gestión-de-ramas-con-git-flow)
-  - [Fichero de configuración CI/CD](#fichero-de-configuración-cicd)
-    - [Test de la aplicación](#test-de-la-aplicación)
-    - [Informe de cobertura](#informe-de-cobertura)
-    - [Linting](#linting)
-    - [Análisis estático de código](#análisis-estático-de-código)
-    - [Análisis de vulnerabilidades](#análisis-de-vulnerabilidades)
-  - [Generación de artefactos](#generación-de-artefactos)
-  - [Publicación de artefactos en un repositorio](#publicación-de-artefactos-en-un-repositorio)
-  - [Construcción de la aplicación](#construcción-de-la-aplicación)
+* [Descripción de la práctica](#descripción-de-la-práctica)
+* [Estructura del proyecto](#estructura-del-proyecto)
+* [Requisitos](#requisitos)
+* [Descripción de los entregables](#descripción-de-los-entregables)
+  * [Repositorio en GitHub y gestión de ramas con git flow](#repositorio-en-github-y-gestión-de-ramas-con-git-flow)
+  * [Fichero de configuración CI/CD](#fichero-de-configuración-cicd)
+    * [Test de la aplicación](#test-de-la-aplicación)
+    * [Informe de cobertura](#informe-de-cobertura)
+    * [Linting](#linting)
+    * [Análisis estático de código](#análisis-estático-de-código)
+    * [Análisis de vulnerabilidades](#análisis-de-vulnerabilidades)
+  * [Generación de artefactos](#generación-de-artefactos)
+  * [Publicación de artefactos en un repositorio](#publicación-de-artefactos-en-un-repositorio)
+  * [Construcción de la aplicación](#construcción-de-la-aplicación)
+  * [Despliegue en ArgoCD](#despliegue-en-ArgoCD)
 
 ## Descripción de la práctica
 
@@ -208,4 +209,34 @@ La imagen Docker se construye y se etiqueta en el job `docker_image`, se ejecuta
 ![alt text](/img/push_dockerhub.png)  
 
 ### Despliegue en ArgoCD
-Para el despliegue en Kubernetes se usará ArgoCD junto con las Charts de Helm, para ello se crea un manifiesto de `aplicattion.yaml` especificando las configuraciones iniciales. 
+Para el despliegue en Kubernetes se usará ArgoCD junto con las Charts de Helm, para ello se crea un manifiesto de `aplicattion.yaml` especificando las configuraciones iniciales. Los manifiestos de Helm estarán en `./charts`.
+
+```
+# Manifiesto de Argocd
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/Bryyyan93/cicd-practica.git'
+    targetRevision: main
+    path: charts
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: myapp-namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+```
+Para verificar el correcto despliegue en ArgoCD se debera:  
+
+- Verificar la instalación de ArgoCD en el Clúster: `kubectl get pods -n argocd`.  
+  ![alt text](/img/argocd_pods.png)  
+
+- Para desplegar la aplicación se ejecutará el siguiente comando: `kubectl apply -f ./charts/application.yaml -n argocd`.  Se deberá pener el siguiente resultado:
+  ![alt text](/img/argo_localhost.png)  
+  ![alt text](/img/aplicacion_desplegada.png)  
