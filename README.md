@@ -78,7 +78,8 @@ Se ejecutan en el job `test` usando `pytest` dado que la aplicación esta en `Py
                 . venv/bin/activate
                 coverage run -m pytest tests
                 coverage xml -o coverage.xml
-    ```
+    ```  
+    ![alt text](/img/Informe_covertura.png)
 - **Linting**: Se requiere usar el pip de `flake8` para verificar el codigo y se ejecuta de la siguiente manera:  
     ``` 
         # Ejecutar lint
@@ -87,7 +88,8 @@ Se ejecutan en el job `test` usando `pytest` dado que la aplicación esta en `Py
             command: |
                 . venv/bin/activate
                 flake8 . 
-    ```   
+    ```  
+    ![alt text](./img/run_lint.png) 
 - **análisis estático de código**: Se utiliza `SonarCloud` para el análisis de calidad, el cual se ejecuta de la siguiente manera:
     ```
     orbs:
@@ -96,6 +98,8 @@ Se ejecutan en el job `test` usando `pytest` dado que la aplicación esta en `Py
         # Analisis del código estático
         - sonarcloud/scan
     ```
+    ![alt text](./img/codigo_estatico.png)
+    ![alt text](/img/SonarCloud.png)
 - **Análisis de vulnerabilidades**: Se ha configurado `GitGuardian`.
     ```
         # Escanear vulnerabilidades con gitGuardian
@@ -105,7 +109,9 @@ Se ejecutan en el job `test` usando `pytest` dado que la aplicación esta en `Py
             . venv/bin/activate
             export GITGUARDIAN_API_KEY=$GITGUARDIAN_API_KEY
             ggshield secret scan repo . 
-    ```
+    ```  
+    ![alt text](/img/gitGuardianScan.png)
+
 #### Generar un artefacto de la aplicación. 
 El job `publish_github` genera un archivo app.zip. Este archivo se genera solo en la rama main.  
 ```
@@ -116,7 +122,8 @@ El job `publish_github` genera un archivo app.zip. Este archivo se genera solo e
             zip -r artifacts/app.zip .
       - store_artifacts:
           path: artifacts/app.zip
-```
+```  
+
 #### Publicar el artefacto en un repositorio de artefactos. 
 Se publica como un asset en el release de GitHub, solo en la rama main.  
 ```
