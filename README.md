@@ -1,9 +1,25 @@
 # Practica: CI/CD de una aplicación
-## Entregables
+
+## Menú
+- [Descripción de la práctica](#descripción-de-la-práctica)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Requisitos](#requisitos)
+- [Descripción de los entregables](#descripción-de-los-entregables)
+  - [Repositorio en GitHub y gestión de ramas con git flow](#repositorio-en-github-y-gestión-de-ramas-con-git-flow)
+  - [Fichero de configuración CI/CD](#fichero-de-configuración-cicd)
+    - [Test de la aplicación](#test-de-la-aplicación)
+    - [Informe de cobertura](#informe-de-cobertura)
+    - [Linting](#linting)
+    - [Análisis estático de código](#análisis-estático-de-código)
+    - [Análisis de vulnerabilidades](#análisis-de-vulnerabilidades)
+  - [Generación de artefactos](#generación-de-artefactos)
+  - [Publicación de artefactos en un repositorio](#publicación-de-artefactos-en-un-repositorio)
+  - [Construcción de la aplicación](#construcción-de-la-aplicación)
 
 ## Descripción de la práctica
 
 Para la práctica se debe implementar un pipeline de CI/CD para una aplicación escrita en el lenguaje de programación que se desee. La aplicación debe ser una aplicación que se pueda ejecutar en un contenedor de Docker. Se tiene que utilizar un servicio de CI/CD que se haya dado en la asignatura (CircleCI, Jenkins o Argo Workflows) aunque se pueden usar otros (Github Actions, Travis CI, etc). La aplicación debe:
+
 1. Estar en un repositorio de GitHub.
 2. Utilizar un sistema de gestión de dependencias.
 3. Utilizar git flow para la gestión de ramas.
@@ -17,6 +33,38 @@ Para la práctica se debe implementar un pipeline de CI/CD para una aplicación 
     7. Genere un artefacto de la aplicación. (solo en la rama master/main)
     8. Publique el artefacto en un repositorio de artefactos. (solo en la rama master/main)
  5. Se despliegue en en un cluster de Kubernetes usando ArgoCD (o similar) en la rama master/main.
+
+## Estructura del proyecto
+
+Este esquema muestra la organización de los archivos y carpetas para el proyecto.
+
+```
+CICD-PRACTICA
+├── .circleci/                   # Configuración de CircleCI
+│   └── config.yml               # Archivo de configuración de CI/CD
+├── app/                         # Código de la aplicación
+├── charts/                      # Archivos de Helm para Kubernetes
+│   └── application.yaml         # Manifest para el despliegue en Kubernetes
+├── img/                         # Recursos de imágenes del proyecto
+├── tests/                       # Pruebas unitarias
+│   └── ...                      # Archivos de pruebas
+├── .dockerignore                # Ignorar archivos en la imagen Docker
+├── .flake8                      # Configuración de flake8 para linting
+├── .gitignore                   # Ignorar archivos en Git
+├── .pylintrc                    # Configuración de pylint
+├── dev-requirements.txt         # Dependencias para desarrollo
+├── Dockerfile                   # Definición de la imagen Docker
+├── README.md                    # Documentación del proyecto
+├── requirements.txt             # Dependencias de la aplicación
+└── sonar-project.properties     # Configuración de SonarCloud
+```
+## Requisitos
+
+- **Docker**: Para construir y ejecutar la aplicación en un contenedor.
+- **CircleCI**: Servicio de CI/CD utilizado para automatizar el pipeline.
+- **ArgoCD**: Utilizado para gestionar el despliegue en el clúster de Kubernetes.
+- **GitHub**: Repositorio para el código y manejo de ramas con Git Flow.
+- **GitGuardian**: Para análisis de vulnerabilidades.
 
 ## Descripción de los entregables
 ### Repositorio en GitHub y gestión de ramas con git flow
@@ -125,7 +173,7 @@ El job `publish_github` genera un archivo app.zip. Este archivo se genera solo e
 ```  
 
 #### Publicar el artefacto en un repositorio de artefactos. 
-Se publica como un asset en el release de GitHub, solo en la rama main.  
+Se publica como un asset en el release de GitHub, solo para la rama main.  
 ```
 - run:
           name: Publish to GitHub Packages
@@ -136,8 +184,14 @@ Se publica como un asset en el release de GitHub, solo en la rama main.
             --data-binary @artifacts/app.zip \
             "https://uploads.github.com/repos/$GITHUB_USER/cicd-practica/releases/${RELEASE_ID}/assets?name=app-${VERSION_TAG}.zip"
 ```  
-#### Construir la aplicación
-La imagen Docker se construye y se etiqueta en el job `docker_image`, que depende de la rama `main`.
+![alt text](/img/publicar_artefacto.png)
+![alt text](/img/job_release.png)
+![alt text](/img/github_release.png)  
+
+#### Construir la aplicación  
+
+La imagen Docker se construye y se etiqueta en el job `docker_image`, se ejecuta en la rama `main`.  
+
 ```
       # Construcción de la imagen
       - run:
@@ -150,3 +204,8 @@ La imagen Docker se construye y se etiqueta en el job `docker_image`, que depend
             docker tag myapp:${VERSION_TAG} $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
             docker push $DOCKERHUB_USERNAME/myapp:${VERSION_TAG}
 ```
+![alt text](/img/build_docker.png)  
+![alt text](/img/push_dockerhub.png)  
+
+### Despliegue en ArgoCD
+Para el despliegue en Kubernetes se usará ArgoCD junto con las Charts de Helm, para ello se crea un manifiesto de `aplicattion.yaml` especificando las configuraciones iniciales. 
