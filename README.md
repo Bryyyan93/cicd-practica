@@ -208,6 +208,11 @@ La imagen Docker se construye y se etiqueta en el job `docker_image`, se ejecuta
 ![alt text](/img/build_docker.png)  
 ![alt text](/img/push_dockerhub.png)  
 
+Las imagenes se almacenas en el repositorio publico de Docker Hub `bryyyan/myapp`.  
+![alt text](/img/docker_hub.png)  
+
+Como se puede observar se ha puesto el hash del release como tag.  
+
 ### Despliegue en ArgoCD
 Para el despliegue en Kubernetes se usará ArgoCD junto con las Charts de Helm, para ello se crea un manifiesto de `aplicattion.yaml` especificando las configuraciones iniciales. Los manifiestos de Helm estarán en `./charts`.
 
