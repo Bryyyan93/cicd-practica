@@ -1,20 +1,21 @@
 # Practica: CI/CD de una aplicación
 
 ## Menú
-- [Descripción de la práctica](#descripción-de-la-práctica)
-- [Estructura del proyecto](#estructura-del-proyecto)
-- [Requisitos](#requisitos)
-- [Descripción de los entregables](#descripción-de-los-entregables)
-  - [Repositorio en GitHub y gestión de ramas con git flow](#repositorio-en-github-y-gestión-de-ramas-con-git-flow)
-  - [Fichero de configuración CI/CD](#fichero-de-configuración-cicd)
-    - [Test de la aplicación](#test-de-la-aplicación)
-    - [Informe de cobertura](#informe-de-cobertura)
-    - [Linting](#linting)
-    - [Análisis estático de código](#análisis-estático-de-código)
-    - [Análisis de vulnerabilidades](#análisis-de-vulnerabilidades)
-  - [Generación de artefactos](#generación-de-artefactos)
-  - [Publicación de artefactos en un repositorio](#publicación-de-artefactos-en-un-repositorio)
-  - [Construcción de la aplicación](#construcción-de-la-aplicación)
+* [Descripción de la práctica](#descripción-de-la-práctica)
+* [Estructura del proyecto](#estructura-del-proyecto)
+* [Requisitos](#requisitos)
+* [Descripción de los entregables](#descripción-de-los-entregables)
+  * [Repositorio en GitHub y gestión de ramas con git flow](#repositorio-en-github-y-gestión-de-ramas-con-git-flow)
+  * [Fichero de configuración CI/CD](#fichero-de-configuración-cicd)
+    * [Test de la aplicación](#test-de-la-aplicación)
+    * [Informe de cobertura](#informe-de-cobertura)
+    * [Linting](#linting)
+    * [Análisis estático de código](#análisis-estático-de-código)
+    * [Análisis de vulnerabilidades](#análisis-de-vulnerabilidades)
+  * [Generación de artefactos](#generación-de-artefactos)
+  * [Publicación de artefactos en un repositorio](#publicación-de-artefactos-en-un-repositorio)
+  * [Construcción de la aplicación](#construcción-de-la-aplicación)
+  * [Despliegue en ArgoCD](#despliegue-en-ArgoCD)
 
 ## Descripción de la práctica
 
